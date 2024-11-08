@@ -7,6 +7,8 @@ namespace OutOfSchool.Encryption.Services;
 /// <inheritdoc/>
 public class DevEUSignOAuth2Service : IEUSignOAuth2Service
 {
+    private readonly JsonSerializerOptions jsonSerializerOptions = new(JsonSerializerDefaults.Web);
+
     /// <inheritdoc/>
     public CertificateResponse GetEnvelopeCertificateBase64() => new()
     {
@@ -22,6 +24,6 @@ public class DevEUSignOAuth2Service : IEUSignOAuth2Service
         }
 
         // Mock local auth server sends data as unencrypted string.
-        return JsonSerializer.Deserialize<UserInfoResponse>(encryptedUserInfo.EncryptedUserInfo);
+        return JsonSerializer.Deserialize<UserInfoResponse>(encryptedUserInfo.EncryptedUserInfo, jsonSerializerOptions);
     }
 }
