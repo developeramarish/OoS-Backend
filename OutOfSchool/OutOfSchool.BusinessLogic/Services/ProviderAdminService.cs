@@ -2,7 +2,6 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using OutOfSchool.BusinessLogic.Models;
 using OutOfSchool.BusinessLogic.Models.Workshops;
 using OutOfSchool.BusinessLogic.Services.SearchString;
@@ -171,8 +170,7 @@ public class ProviderAdminService : CommunicationService, IProviderAdminService
                     Message = r.Message,
                 })
             .Map(result => result.Result is not null
-                ? JsonConvert
-                    .DeserializeObject<UpdateProviderAdminDto>(result.Result.ToString())
+                ? JsonSerializerHelper.Deserialize<UpdateProviderAdminDto>(result.Result.ToString())
                 : null);
     }
 
@@ -235,8 +233,7 @@ public class ProviderAdminService : CommunicationService, IProviderAdminService
                     Message = r.Message,
                 })
             .Map(result => result.Result is not null
-                ? JsonConvert
-                    .DeserializeObject<ActionResult>(result.Result.ToString())
+                ? JsonSerializerHelper.Deserialize<ActionResult>(result.Result.ToString())
                 : null);
     }
 
@@ -307,8 +304,7 @@ public class ProviderAdminService : CommunicationService, IProviderAdminService
                     Message = r.Message,
                 })
             .Map(result => result.Result is not null
-                ? JsonConvert
-                    .DeserializeObject<ActionResult>(result.Result.ToString())
+                ? JsonSerializerHelper.Deserialize<ActionResult>(result.Result.ToString())
                 : null);
     }
 
@@ -354,8 +350,7 @@ public class ProviderAdminService : CommunicationService, IProviderAdminService
                     Message = r.Message,
                 })
             .Map(result => result.Result is not null
-                ? JsonConvert
-                    .DeserializeObject<ActionResult>(result.Result.ToString())
+                ? JsonSerializerHelper.Deserialize<ActionResult>(result.Result.ToString())
                 : null);
     }
 
@@ -644,8 +639,7 @@ public class ProviderAdminService : CommunicationService, IProviderAdminService
                     Message = r.Message,
                 })
             .Map(result => result.Result is not null
-                ? JsonConvert
-                    .DeserializeObject<ActionResult>(result.Result.ToString())
+                ? JsonSerializerHelper.Deserialize<ActionResult>(result.Result.ToString())
                 : null);
     }
 

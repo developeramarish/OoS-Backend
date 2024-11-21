@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
+using OutOfSchool.Common;
 using StackExchange.Redis;
 using System;
 using System.Threading;
@@ -57,7 +57,7 @@ public class CacheService : ICacheService, IDisposable
 
                 if (value != null)
                 {
-                    returnValue = JsonConvert.DeserializeObject<T>(value);
+                    returnValue = JsonSerializerHelper.Deserialize<T>(value);
                     isExists = true;
                     return;
                 }
@@ -82,7 +82,7 @@ public class CacheService : ICacheService, IDisposable
                         SlidingExpiration = slidingExpirationInterval ?? redisConfig.SlidingExpirationInterval,
                     };
 
-                    cache.SetString(key, JsonConvert.SerializeObject(returnValue), options);
+                    cache.SetString(key, JsonSerializerHelper.Serialize(returnValue), options);
                 }
                 finally
                 {

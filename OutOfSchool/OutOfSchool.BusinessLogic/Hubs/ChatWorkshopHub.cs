@@ -2,7 +2,6 @@
 using System.Security.Authentication;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Localization;
-using Newtonsoft.Json;
 using OutOfSchool.BusinessLogic.Common;
 using OutOfSchool.BusinessLogic.Models.ChatWorkshop;
 using OutOfSchool.Services.Enums;
@@ -132,7 +131,7 @@ public class ChatWorkshopHub : Hub
         try
         {
             // Deserialize from string to Object
-            var chatMessageWorkshopCreateDto = JsonConvert.DeserializeObject<ChatMessageWorkshopCreateDto>(chatNewMessage);
+            var chatMessageWorkshopCreateDto = JsonSerializerHelper.Deserialize<ChatMessageWorkshopCreateDto>(chatNewMessage);
 
             var chatRoomExists = await roomService.GetByIdAsync(chatMessageWorkshopCreateDto.ChatRoomId).ConfigureAwait(false) is not null;
 
@@ -186,7 +185,7 @@ public class ChatWorkshopHub : Hub
 
             // Send chatMessage.
             await Clients.Group(createdMessageDto.ChatRoomId.ToString())
-                .SendAsync("ReceiveMessageInChatGroup", JsonConvert.SerializeObject(createdMessageDto))
+                .SendAsync("ReceiveMessageInChatGroup", JsonSerializerHelper.Serialize(createdMessageDto))
                 .ConfigureAwait(false);
         }
         catch (AuthenticationException exception)
