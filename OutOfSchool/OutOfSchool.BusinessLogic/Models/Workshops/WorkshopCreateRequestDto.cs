@@ -1,15 +1,15 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using OutOfSchool.BusinessLogic.Util.CustomValidation;
 using OutOfSchool.BusinessLogic.Util.JsonTools;
 using OutOfSchool.Common.Enums;
 using OutOfSchool.Common.Validators;
 using OutOfSchool.Services.Enums;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 namespace OutOfSchool.BusinessLogic.Models.Workshops;
 
-public class WorkshopBaseDto : IValidatableObject
+public class WorkshopCreateRequestDto : IValidatableObject
 {
     public Guid Id { get; set; }
 
@@ -69,7 +69,7 @@ public class WorkshopBaseDto : IValidatableObject
 
     [Required(ErrorMessage = "Form of learning is required")]
     [EnumDataType(typeof(FormOfLearning), ErrorMessage = Constants.EnumErrorMessage)]
-    public FormOfLearning FormOfLearning { get; set; }
+    public FormOfLearning FormOfLearning { get; set; } = FormOfLearning.Offline;
 
     [Required(ErrorMessage = "Available seats are required")]
     public uint? AvailableSeats { get; set; } = uint.MaxValue;
@@ -90,11 +90,7 @@ public class WorkshopBaseDto : IValidatableObject
 
     public Guid? InstitutionId { get; set; }
 
-    public string Institution { get; set; }
-
     public Guid? InstitutionHierarchyId { get; set; }
-
-    public string InstitutionHierarchy { get; set; }
 
     [ModelBinder(BinderType = typeof(JsonModelBinder))]
     public TeacherDTO DefaultTeacher { get; set; }
@@ -109,16 +105,6 @@ public class WorkshopBaseDto : IValidatableObject
 
     [Required]
     public Guid ProviderId { get; set; }
-
-    [Required]
-    [MaxLength(Constants.MaxProviderFullTitleLength)]
-    public string ProviderTitle { get; set; } = string.Empty;
-
-    [MaxLength(Constants.MaxProviderFullTitleLength)]
-    public string ProviderTitleEn { get; set; } = string.Empty;
-
-    [EnumDataType(typeof(ProviderLicenseStatus), ErrorMessage = Constants.EnumErrorMessage)]
-    public ProviderLicenseStatus ProviderLicenseStatus { get; set; } = ProviderLicenseStatus.NotProvided;
 
     public DateOnly ActiveFrom { get; set; }
 
@@ -166,18 +152,15 @@ public class WorkshopBaseDto : IValidatableObject
 
     public Guid? MemberOfWorkshopId { get; set; }
 
-    [ModelBinder(BinderType = typeof(JsonModelBinder))]
-    public WorkshopBaseDto MemberOfWorkshop { get; set; }
-
-    [ModelBinder(BinderType = typeof(JsonModelBinder))]
-    public virtual ICollection<WorkshopBaseDto> IncludedStudyGroups { get; set; } // Navigation property to included study groups
-
     [Required]
     public long AddressId { get; set; }
 
     [Required]
     [ModelBinder(BinderType = typeof(JsonModelBinder))]
     public AddressDto Address { get; set; }
+
+    [ModelBinder(BinderType = typeof(JsonModelBinder))]
+    public List<long> TagIds { get; set; } = [];
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
