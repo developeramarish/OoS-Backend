@@ -8,5 +8,5 @@ public class GrpcConfig
 
     public int Port { get; set; }
 
-    public string ProviderAdminConfirmationLink { get; set; }
+    public string EmployeeConfirmationLink { get; set; } = null!;
 }

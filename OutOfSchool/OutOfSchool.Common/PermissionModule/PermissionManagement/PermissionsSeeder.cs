@@ -37,7 +37,7 @@ public static class PermissionsSeeder
         Permissions.AddressAddNew, Permissions.AddressEdit, Permissions.AddressRead, Permissions.AddressRemove,
         Permissions.ApplicationRead, Permissions.ApplicationEdit,
         Permissions.ProviderAddNew, Permissions.ProviderEdit, Permissions.ProviderRead, Permissions.ProviderRemove,
-        Permissions.ProviderAdmins,
+        Permissions.Employees,
         Permissions.TeacherAddNew, Permissions.TeacherEdit, Permissions.TeacherRemove, Permissions.TeacherRead,
         Permissions.UserRead, Permissions.UserEdit,
         Permissions.WorkshopEdit, Permissions.WorkshopRemove, Permissions.WorkshopAddNew,
@@ -45,13 +45,13 @@ public static class PermissionsSeeder
         Permissions.CompetitiveEventRead, Permissions.CompetitiveEventAddNew, Permissions.CompetitiveEventEdit, Permissions.CompetitiveEventRemove,
     };
 
-    private static readonly IEnumerable<Permissions> SeedProviderAdminPermissions = new List<Permissions>
+    private static readonly IEnumerable<Permissions> SeedEmployeePermissions = new List<Permissions>
     {
         Permissions.ImpersonalDataRead,
         Permissions.AddressAddNew, Permissions.AddressEdit, Permissions.AddressRead, Permissions.AddressRemove,
         Permissions.ApplicationRead, Permissions.ApplicationEdit,
         Permissions.ProviderRead,
-        Permissions.ProviderAdmins,
+        Permissions.Employees,
         Permissions.TeacherAddNew, Permissions.TeacherEdit, Permissions.TeacherRemove, Permissions.TeacherRead,
         Permissions.UserRead, Permissions.UserEdit,
         Permissions.WorkshopEdit, Permissions.WorkshopAddNew,
@@ -147,8 +147,8 @@ public static class PermissionsSeeder
             case "provider":
                 return SeedProviderPermissions.PackPermissionsIntoString();
 
-            case "provideradmin":
-                return SeedProviderAdminPermissions.PackPermissionsIntoString();
+            case "employee":
+                return SeedEmployeePermissions.PackPermissionsIntoString();
 
             case "ministryadmin":
                 return SeedMinistryAdminPermissions.PackPermissionsIntoString();

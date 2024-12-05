@@ -33,7 +33,7 @@ public class ApplicationService : IApplicationService, ISensitiveApplicationServ
     private readonly ILogger<ApplicationService> logger;
     private readonly IMapper mapper;
     private readonly INotificationService notificationService;
-    private readonly IProviderAdminService providerAdminService;
+    private readonly IEmployeeService employeeService;
     private readonly IChangesLogService changesLogService;
     private readonly ApplicationsConstraintsConfig applicationsConstraintsConfig;
     private readonly IWorkshopServicesCombiner combinedWorkshopService;
@@ -61,7 +61,7 @@ public class ApplicationService : IApplicationService, ISensitiveApplicationServ
     /// <param name="mapper">Automapper DI service.</param>
     /// <param name="applicationsConstraintsConfig">Options for application's constraints.</param>
     /// <param name="notificationService">Notification service.</param>
-    /// <param name="providerAdminService">Service for getting provider admins and deputies.</param>
+    /// <param name="employeeService">Service for getting provider admins and deputies.</param>
     /// <param name="changesLogService">ChangesLogService.</param>
     /// <param name="combinedWorkshopService">WorkshopServicesCombiner.</param>
     /// <param name="currentUserService">Service for managing current user rights.</param>
@@ -80,7 +80,7 @@ public class ApplicationService : IApplicationService, ISensitiveApplicationServ
         IMapper mapper,
         IOptions<ApplicationsConstraintsConfig> applicationsConstraintsConfig,
         INotificationService notificationService,
-        IProviderAdminService providerAdminService,
+        IEmployeeService employeeService,
         IChangesLogService changesLogService,
         IWorkshopServicesCombiner combinedWorkshopService,
         ICurrentUserService currentUserService,
@@ -98,8 +98,8 @@ public class ApplicationService : IApplicationService, ISensitiveApplicationServ
         this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         this.mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         this.notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
-        this.providerAdminService =
-            providerAdminService ?? throw new ArgumentNullException(nameof(providerAdminService));
+        this.employeeService =
+            employeeService ?? throw new ArgumentNullException(nameof(employeeService));
         this.changesLogService = changesLogService ?? throw new ArgumentNullException(nameof(changesLogService));
         this.applicationsConstraintsConfig = (applicationsConstraintsConfig ??
                                               throw new ArgumentNullException(nameof(applicationsConstraintsConfig))).Value;
@@ -252,7 +252,7 @@ public class ApplicationService : IApplicationService, ISensitiveApplicationServ
     public async Task<int> GetCountByParentId(Guid id)
     {
         logger.LogInformation("Getting Applications count by Parent Id started. Looking Parent Id = {Id}", id);
-        if (!currentUserService.IsInRole(Role.Provider) && !currentUserService.IsDeputyOrProviderAdmin())
+        if (!currentUserService.IsInRole(Role.Provider) && !currentUserService.IsEmployeeOrProvider())
         {
             throw new UnauthorizedAccessException("User has no rights to perform operation");
         }
@@ -300,7 +300,7 @@ public class ApplicationService : IApplicationService, ISensitiveApplicationServ
         {
             await currentUserService.UserHasRights(
                 new ProviderRights(providerId),
-                new ProviderAdminWorkshopRights(providerId, id));
+                new EmployeeWorkshopRights(providerId, id));
         }
 
         filter ??= new ApplicationFilter();
@@ -382,35 +382,32 @@ public class ApplicationService : IApplicationService, ISensitiveApplicationServ
     }
 
     /// <inheritdoc/>
-    public async Task<SearchResult<ApplicationDto>> GetAllByProviderAdmin(
+    public async Task<SearchResult<ApplicationDto>> GetAllByEmployee(
         string userId,
         ApplicationFilter filter,
         Guid providerId = default,
         bool isDeputy = false)
     {
         logger.LogInformation(
-            "Getting Applications by ProviderAdmin userId started. Looking ProviderAdmin userId = {UserId}", userId);
+            "Getting Applications by Employee userId started. Looking employee userId = {UserId}", userId);
 
         if (!currentUserService.IsAdmin())
         {
-            await currentUserService.UserHasRights(new ProviderAdminRights(userId));
+            await currentUserService.UserHasRights(new EmployeeRights(userId));
         }
 
         filter ??= new ApplicationFilter();
 
         if (providerId == Guid.Empty)
         {
-            FillProviderAdminInfo(userId, out providerId, out isDeputy);
+            this.FillEmployeeInfo(userId, out providerId);
         }
 
         List<Guid> workshopIds = new List<Guid>();
 
-        if (!isDeputy)
-        {
-            workshopIds =
-                (await providerAdminService.GetRelatedWorkshopIdsForProviderAdmins(userId).ConfigureAwait(false))
-                .ToList();
-        }
+        workshopIds =
+            (await employeeService.GetRelatedWorkshopIdsForEmployees(userId).ConfigureAwait(false))
+            .ToList();
 
         Expression<Func<Workshop, bool>> workshopFilter =
             w => isDeputy ? w.ProviderId == providerId : workshopIds.Contains(w.Id);
@@ -428,7 +425,7 @@ public class ApplicationService : IApplicationService, ISensitiveApplicationServ
             whereExpression: predicate, orderBy: sortPredicate).ToListAsync().ConfigureAwait(false);
 
         logger.LogInformation(
-            "There are {Count} applications in the Db with AdminProvider Id = {UserId}",
+            "There are {Count} applications in the Db with employee Id = {UserId}",
             applications.Count,
             userId);
 
@@ -463,7 +460,7 @@ public class ApplicationService : IApplicationService, ISensitiveApplicationServ
         await currentUserService.UserHasRights(
             new ParentRights(application.ParentId),
             new ProviderRights(application.Workshop.ProviderId),
-            new ProviderAdminWorkshopRights(application.Workshop.ProviderId, application.Workshop.Id));
+            new EmployeeWorkshopRights(application.Workshop.ProviderId, application.Workshop.Id));
 
         return mapper.Map<ApplicationDto>(application);
     }
@@ -539,9 +536,8 @@ public class ApplicationService : IApplicationService, ISensitiveApplicationServ
         }
 
         var userRole = currentUserService.UserRole.ToLower();
-        var userSubroleName = currentUserService.UserSubRole.ToLower();
 
-        if (!applicationStatusPermissions.CanChangeStatus(userRole, userSubroleName, application.Status, applicationDto.Status))
+        if (!applicationStatusPermissions.CanChangeStatus(userRole, application.Status, applicationDto.Status))
         {
             throw new ArgumentException("Forbidden to update status from " + application.Status + " to " + applicationDto.Status);
         }
@@ -721,19 +717,18 @@ public class ApplicationService : IApplicationService, ISensitiveApplicationServ
         return (IsCorrect: true, SecondsRetryAfter: 0);
     }
 
-    private void FillProviderAdminInfo(string userId, out Guid providerId, out bool isDeputy)
+    private void FillEmployeeInfo(string userId, out Guid providerId)
     {
-        var providerAdmin = providerAdminService.GetById(userId).GetAwaiter().GetResult();
+        var employee = employeeService.GetById(userId).GetAwaiter().GetResult();
 
-        if (providerAdmin == null)
+        if (employee == null)
         {
-            logger.LogError("ProviderAdmin with userId = {UserId} not exists", userId);
+            logger.LogError("employee with userId = {UserId} not exists", userId);
 
-            throw new ArgumentException($"There is no providerAdmin with userId = {userId}");
+            throw new ArgumentException($"There is no employee with userId = {userId}");
         }
 
-        providerId = providerAdmin.ProviderId;
-        isDeputy = providerAdmin.IsDeputy;
+        providerId = employee.ProviderId;
     }
 
     private async Task ControlWorkshopStatus(
@@ -878,7 +873,7 @@ public class ApplicationService : IApplicationService, ISensitiveApplicationServ
         await currentUserService.UserHasRights(
             new ParentRights(applicationDto.ParentId),
             new ProviderRights(providerId),
-            new ProviderAdminWorkshopRights(providerId, applicationDto.WorkshopId));
+            new EmployeeWorkshopRights(providerId, applicationDto.WorkshopId));
         var currentApplication = this.CheckApplicationExists(applicationDto.Id);
 
         if (currentApplication is null)
@@ -981,9 +976,9 @@ public class ApplicationService : IApplicationService, ISensitiveApplicationServ
         if (action == NotificationAction.Create)
         {
             recipientIds.Add(application.Workshop.Provider.UserId);
-            recipientIds.AddRange(await providerAdminService.GetProviderAdminsIds(application.Workshop.Id)
+            recipientIds.AddRange(await employeeService.GetEmployeesIds(application.Workshop.Id)
                 .ConfigureAwait(false));
-            recipientIds.AddRange(await providerAdminService.GetProviderDeputiesIds(application.Workshop.Provider.Id)
+            recipientIds.AddRange(await employeeService.GetEmployeesIds(application.Workshop.Provider.Id)
                 .ConfigureAwait(false));
         }
         else if (action == NotificationAction.Update)
@@ -999,10 +994,10 @@ public class ApplicationService : IApplicationService, ISensitiveApplicationServ
                 else if (applicationStatus == ApplicationStatus.Left)
                 {
                     recipientIds.Add(application.Workshop.Provider.UserId);
-                    recipientIds.AddRange(await providerAdminService.GetProviderAdminsIds(application.Workshop.Id)
+                    recipientIds.AddRange(await employeeService.GetEmployeesIds(application.Workshop.Id)
                         .ConfigureAwait(false));
-                    recipientIds.AddRange(await providerAdminService
-                        .GetProviderDeputiesIds(application.Workshop.Provider.Id).ConfigureAwait(false));
+                    recipientIds.AddRange(await employeeService
+                        .GetEmployeesIds(application.Workshop.Provider.Id).ConfigureAwait(false));
                 }
             }
         }

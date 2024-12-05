@@ -149,7 +149,7 @@ public static class Startup
             .Get<AuthorizationServerConfig>();
 
         services.Configure<AuthorizationServerConfig>(configuration.GetSection(AuthorizationServerConfig.Name));
-        services.Configure<ProviderAdminConfig>(configuration.GetSection(ProviderAdminConfig.Name));
+        services.Configure<EmployeeConfig>(configuration.GetSection(EmployeeConfig.Name));
         services.Configure<CommunicationConfig>(configuration.GetSection(CommunicationConfig.Name));
         services.Configure<GeocodingConfig>(configuration.GetSection(GeocodingConfig.Name));
         services.Configure<ParentConfig>(configuration.GetSection(ParentConfig.Name));
@@ -221,7 +221,7 @@ public static class Startup
 
         services.AddRazorPages();
         services.AddHttpContextAccessor();
-        services.AddScoped<IProviderAdminService, ProviderAdminService>();
+        services.AddScoped<IEmployeeService, EmployeeService>();
         services.AddScoped<IMinistryAdminService, MinistryAdminService>();
         services.AddScoped<ISensitiveMinistryAdminService, MinistryAdminService>();
         services.AddScoped<IRegionAdminService, RegionAdminService>();
@@ -378,7 +378,7 @@ public static class Startup
         services.AddTransient(typeof(IEntityRepositorySoftDeleted<,>), typeof(EntityRepositorySoftDeleted<,>));
         services.AddTransient(typeof(ISensitiveEntityRepositorySoftDeleted<>), typeof(SensitiveEntityRepositorySoftDeleted<>));
 
-        services.AddTransient<IProviderAdminRepository, ProviderAdminRepository>();
+        services.AddTransient<IEmployeeRepository, EmployeeRepository>();
         services.AddTransient<IInstitutionAdminRepository, InstitutionAdminRepository>();
         services.AddTransient<IRegionAdminRepository, RegionAdminRepository>();
         services.AddTransient<IAreaAdminRepository, AreaAdminRepository>();
@@ -475,16 +475,7 @@ public static class Startup
         services.AddOptions<GRPCConfig>()
             .Bind(configuration.GetSection(GRPCConfig.Name))
             .ValidateDataAnnotations();
-
-        var gRPCConfig = configuration.GetSection(GRPCConfig.Name).Get<GRPCConfig>();
-        if (gRPCConfig.Enabled)
-        {
-            services.AddTransient<IProviderAdminOperationsService, ProviderAdminOperationsGRPCService>();
-        }
-        else
-        {
-            services.AddTransient<IProviderAdminOperationsService, ProviderAdminOperationsRESTService>();
-        }
+        services.AddTransient<IEmployeeOperationsService, EmployeeOperationsRESTService>();
 
         // Required to inject it in OutOfSchool.WebApi.Extensions.Startup.CustomSwaggerOptions class
         services.AddSingleton(swaggerConfig);

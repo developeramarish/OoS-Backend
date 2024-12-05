@@ -64,6 +64,21 @@ namespace OutOfSchool.IdentityServer.Data.Migrations.OutOfSchoolMigrations
                     b.ToTable("DirectionInstitutionHierarchy");
                 });
 
+            modelBuilder.Entity("EmployeeWorkshop", b =>
+                {
+                    b.Property<string>("EmployeesUserId")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<Guid>("ManagedWorkshopsId")
+                        .HasColumnType("binary(16)");
+
+                    b.HasKey("EmployeesUserId", "ManagedWorkshopsId");
+
+                    b.HasIndex("ManagedWorkshopsId");
+
+                    b.ToTable("EmployeeWorkshop");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey", b =>
                 {
                     b.Property<int>("Id")
@@ -1228,6 +1243,78 @@ namespace OutOfSchool.IdentityServer.Data.Migrations.OutOfSchoolMigrations
                     b.ToTable("ElasticsearchSyncRecords");
                 });
 
+            modelBuilder.Entity("OutOfSchool.Services.Models.Employee", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<int>("BlockingType")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
+
+                    b.Property<Guid>("ProviderId")
+                        .HasColumnType("binary(16)");
+
+                    b.HasKey("UserId");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("ProviderId");
+
+                    b.ToTable("Employees");
+                });
+
+            modelBuilder.Entity("OutOfSchool.Services.Models.EmployeeChangesLog", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("EmployeeUserId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("NewValue")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<string>("OldValue")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<DateTime>("OperationDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("OperationType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PropertyName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar(128)");
+
+                    b.Property<Guid>("ProviderId")
+                        .HasColumnType("binary(16)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeUserId");
+
+                    b.HasIndex("ProviderId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("EmployeeChangesLog");
+                });
+
             modelBuilder.Entity("OutOfSchool.Services.Models.Favorite", b =>
                 {
                     b.Property<long>("Id")
@@ -1297,6 +1384,101 @@ namespace OutOfSchool.IdentityServer.Data.Migrations.OutOfSchoolMigrations
                     b.HasKey("EntityId", "ExternalStorageId");
 
                     b.ToTable("WorkshopImages");
+                });
+
+            modelBuilder.Entity("OutOfSchool.Services.Models.Individual", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("binary(16)");
+
+                    b.Property<DateOnly>("ActiveFrom")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly>("ActiveTo")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("date")
+                        .HasDefaultValue(new DateOnly(9999, 12, 31));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(36)
+                        .HasColumnType("char");
+
+                    b.Property<DateTime?>("DeleteDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("DeletedBy")
+                        .HasMaxLength(36)
+                        .HasColumnType("char");
+
+                    b.Property<string>("Document")
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid>("ExternalRegistryId")
+                        .HasColumnType("binary(16)");
+
+                    b.Property<string>("File")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("varchar(60)");
+
+                    b.Property<int>("Gender")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsBlocked")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsRegistered")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsSystemProtected")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("varchar(60)");
+
+                    b.Property<string>("MiddleName")
+                        .HasMaxLength(60)
+                        .HasColumnType("varchar(60)");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(36)
+                        .HasColumnType("char");
+
+                    b.Property<string>("Rnokpp")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("Rnokpp")
+                        .IsUnique();
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("Individuals");
                 });
 
             modelBuilder.Entity("OutOfSchool.Services.Models.InstitutionAdmin", b =>
@@ -1413,6 +1595,87 @@ namespace OutOfSchool.IdentityServer.Data.Migrations.OutOfSchoolMigrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("OutOfSchool.Services.Models.Official", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("binary(16)");
+
+                    b.Property<DateOnly>("ActiveFrom")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly>("ActiveTo")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(36)
+                        .HasColumnType("char");
+
+                    b.Property<DateTime?>("DeleteDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("DeletedBy")
+                        .HasMaxLength(36)
+                        .HasColumnType("char");
+
+                    b.Property<string>("DismissalOrder")
+                        .HasMaxLength(2000)
+                        .HasColumnType("varchar(2000)");
+
+                    b.Property<string>("DismissalReason")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Document")
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("EmploymentType")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("ExternalRegistryId")
+                        .HasColumnType("binary(16)");
+
+                    b.Property<string>("File")
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid>("IndividualId")
+                        .HasColumnType("binary(16)");
+
+                    b.Property<bool>("IsBlocked")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsSystemProtected")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(36)
+                        .HasColumnType("char");
+
+                    b.Property<Guid>("PositionId")
+                        .HasColumnType("binary(16)");
+
+                    b.Property<string>("RecruitmentOrder")
+                        .HasMaxLength(2000)
+                        .HasColumnType("varchar(2000)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IndividualId");
+
+                    b.HasIndex("PositionId");
+
+                    b.ToTable("Officials");
                 });
 
             modelBuilder.Entity("OutOfSchool.Services.Models.OperationWithObject", b =>
@@ -1563,9 +1826,9 @@ namespace OutOfSchool.IdentityServer.Data.Migrations.OutOfSchoolMigrations
                         new
                         {
                             Id = 4L,
-                            Description = "provider admin permissions",
+                            Description = "employee permissions",
                             PackedPermissions = "ZQMCAQQKCzI2SEdJRlBRW1xUlg==",
-                            RoleName = "ProviderAdmin"
+                            RoleName = "Employee"
                         },
                         new
                         {
@@ -1595,6 +1858,113 @@ namespace OutOfSchool.IdentityServer.Data.Migrations.OutOfSchoolMigrations
                             PackedPermissions = "MjdaXlQ=",
                             RoleName = "Moderator"
                         });
+                });
+
+            modelBuilder.Entity("OutOfSchool.Services.Models.Position", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("binary(16)");
+
+                    b.Property<DateOnly>("ActiveFrom")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly>("ActiveTo")
+                        .HasColumnType("date");
+
+                    b.Property<string>("ClassifierType")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("varchar(60)");
+
+                    b.Property<Guid>("ContactId")
+                        .HasColumnType("binary(16)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(36)
+                        .HasColumnType("char");
+
+                    b.Property<DateTime?>("DeleteDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("DeletedBy")
+                        .HasMaxLength(36)
+                        .HasColumnType("char");
+
+                    b.Property<string>("Department")
+                        .HasMaxLength(60)
+                        .HasColumnType("varchar(60)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<string>("Document")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("File")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("varchar(60)");
+
+                    b.Property<string>("GenitiveName")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("varchar(60)");
+
+                    b.Property<bool>("IsBlocked")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsForRuralAreas")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsSystemProtected")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsTeachingPosition")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Language")
+                        .HasMaxLength(30)
+                        .HasColumnType("varchar(30)");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(36)
+                        .HasColumnType("char");
+
+                    b.Property<Guid>("ProviderId")
+                        .HasColumnType("binary(16)");
+
+                    b.Property<float>("Rate")
+                        .HasColumnType("float");
+
+                    b.Property<int>("SeatsAmount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ShortName")
+                        .HasMaxLength(60)
+                        .HasColumnType("varchar(60)");
+
+                    b.Property<float>("Tariff")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProviderId");
+
+                    b.ToTable("Positions");
                 });
 
             modelBuilder.Entity("OutOfSchool.Services.Models.Provider", b =>
@@ -1761,84 +2131,6 @@ namespace OutOfSchool.IdentityServer.Data.Migrations.OutOfSchoolMigrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Providers");
-                });
-
-            modelBuilder.Entity("OutOfSchool.Services.Models.ProviderAdmin", b =>
-                {
-                    b.Property<string>("UserId")
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<int>("BlockingType")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint(1)")
-                        .HasDefaultValue(false);
-
-                    b.Property<bool>("IsDeputy")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<Guid>("ProviderId")
-                        .HasColumnType("binary(16)");
-
-                    b.HasKey("UserId");
-
-                    b.HasIndex("IsDeleted");
-
-                    b.HasIndex("ProviderId");
-
-                    b.ToTable("ProviderAdmins");
-                });
-
-            modelBuilder.Entity("OutOfSchool.Services.Models.ProviderAdminChangesLog", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    b.Property<bool>("IsDeputy")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("NewValue")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
-
-                    b.Property<string>("OldValue")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
-
-                    b.Property<DateTime>("OperationDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("OperationType")
-                        .HasColumnType("int");
-
-                    b.Property<string>("PropertyName")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("varchar(128)");
-
-                    b.Property<string>("ProviderAdminUserId")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<Guid>("ProviderId")
-                        .HasColumnType("binary(16)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProviderAdminUserId");
-
-                    b.HasIndex("ProviderId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ProviderAdminChangesLog");
                 });
 
             modelBuilder.Entity("OutOfSchool.Services.Models.ProviderSectionItem", b =>
@@ -3374,21 +3666,6 @@ namespace OutOfSchool.IdentityServer.Data.Migrations.OutOfSchoolMigrations
                     b.ToTable("WorkshopDescriptionItems");
                 });
 
-            modelBuilder.Entity("ProviderAdminWorkshop", b =>
-                {
-                    b.Property<Guid>("ManagedWorkshopsId")
-                        .HasColumnType("binary(16)");
-
-                    b.Property<string>("ProviderAdminsUserId")
-                        .HasColumnType("varchar(255)");
-
-                    b.HasKey("ManagedWorkshopsId", "ProviderAdminsUserId");
-
-                    b.HasIndex("ProviderAdminsUserId");
-
-                    b.ToTable("ProviderAdminWorkshop");
-                });
-
             modelBuilder.Entity("TagWorkshop", b =>
                 {
                     b.Property<long>("TagsId")
@@ -3445,6 +3722,21 @@ namespace OutOfSchool.IdentityServer.Data.Migrations.OutOfSchoolMigrations
                     b.HasOne("OutOfSchool.Services.Models.SubordinationStructure.InstitutionHierarchy", null)
                         .WithMany()
                         .HasForeignKey("InstitutionHierarchiesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("EmployeeWorkshop", b =>
+                {
+                    b.HasOne("OutOfSchool.Services.Models.Employee", null)
+                        .WithMany()
+                        .HasForeignKey("EmployeesUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OutOfSchool.Services.Models.Workshop", null)
+                        .WithMany()
+                        .HasForeignKey("ManagedWorkshopsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -3745,6 +4037,44 @@ namespace OutOfSchool.IdentityServer.Data.Migrations.OutOfSchoolMigrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("OutOfSchool.Services.Models.Employee", b =>
+                {
+                    b.HasOne("OutOfSchool.Services.Models.Provider", "Provider")
+                        .WithMany("Employees")
+                        .HasForeignKey("ProviderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Provider");
+                });
+
+            modelBuilder.Entity("OutOfSchool.Services.Models.EmployeeChangesLog", b =>
+                {
+                    b.HasOne("OutOfSchool.Services.Models.User", "EmployeeUser")
+                        .WithMany()
+                        .HasForeignKey("EmployeeUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OutOfSchool.Services.Models.Provider", "Provider")
+                        .WithMany()
+                        .HasForeignKey("ProviderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OutOfSchool.Services.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("EmployeeUser");
+
+                    b.Navigation("Provider");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("OutOfSchool.Services.Models.Favorite", b =>
                 {
                     b.HasOne("OutOfSchool.Services.Models.User", "User")
@@ -3786,6 +4116,15 @@ namespace OutOfSchool.IdentityServer.Data.Migrations.OutOfSchoolMigrations
                     b.Navigation("Entity");
                 });
 
+            modelBuilder.Entity("OutOfSchool.Services.Models.Individual", b =>
+                {
+                    b.HasOne("OutOfSchool.Services.Models.User", "User")
+                        .WithOne("Individual")
+                        .HasForeignKey("OutOfSchool.Services.Models.Individual", "UserId");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("OutOfSchool.Services.Models.InstitutionAdmin", b =>
                 {
                     b.HasOne("OutOfSchool.Services.Models.SubordinationStructure.Institution", "Institution")
@@ -3803,6 +4142,25 @@ namespace OutOfSchool.IdentityServer.Data.Migrations.OutOfSchoolMigrations
                     b.Navigation("Institution");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("OutOfSchool.Services.Models.Official", b =>
+                {
+                    b.HasOne("OutOfSchool.Services.Models.Individual", "Individual")
+                        .WithMany("Officials")
+                        .HasForeignKey("IndividualId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OutOfSchool.Services.Models.Position", "Position")
+                        .WithMany("Officials")
+                        .HasForeignKey("PositionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Individual");
+
+                    b.Navigation("Position");
                 });
 
             modelBuilder.Entity("OutOfSchool.Services.Models.Parent", b =>
@@ -3833,6 +4191,17 @@ namespace OutOfSchool.IdentityServer.Data.Migrations.OutOfSchoolMigrations
                     b.Navigation("Parent");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("OutOfSchool.Services.Models.Position", b =>
+                {
+                    b.HasOne("OutOfSchool.Services.Models.Provider", "Provider")
+                        .WithMany("Positions")
+                        .HasForeignKey("ProviderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Provider");
                 });
 
             modelBuilder.Entity("OutOfSchool.Services.Models.Provider", b =>
@@ -3881,44 +4250,6 @@ namespace OutOfSchool.IdentityServer.Data.Migrations.OutOfSchoolMigrations
                     b.Navigation("LegalAddress");
 
                     b.Navigation("Type");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("OutOfSchool.Services.Models.ProviderAdmin", b =>
-                {
-                    b.HasOne("OutOfSchool.Services.Models.Provider", "Provider")
-                        .WithMany("ProviderAdmins")
-                        .HasForeignKey("ProviderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Provider");
-                });
-
-            modelBuilder.Entity("OutOfSchool.Services.Models.ProviderAdminChangesLog", b =>
-                {
-                    b.HasOne("OutOfSchool.Services.Models.User", "ProviderAdminUser")
-                        .WithMany()
-                        .HasForeignKey("ProviderAdminUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("OutOfSchool.Services.Models.Provider", "Provider")
-                        .WithMany()
-                        .HasForeignKey("ProviderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("OutOfSchool.Services.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Provider");
-
-                    b.Navigation("ProviderAdminUser");
 
                     b.Navigation("User");
                 });
@@ -4058,21 +4389,6 @@ namespace OutOfSchool.IdentityServer.Data.Migrations.OutOfSchoolMigrations
                     b.Navigation("Workshop");
                 });
 
-            modelBuilder.Entity("ProviderAdminWorkshop", b =>
-                {
-                    b.HasOne("OutOfSchool.Services.Models.Workshop", null)
-                        .WithMany()
-                        .HasForeignKey("ManagedWorkshopsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("OutOfSchool.Services.Models.ProviderAdmin", null)
-                        .WithMany()
-                        .HasForeignKey("ProviderAdminsUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("TagWorkshop", b =>
                 {
                     b.HasOne("OutOfSchool.Services.Models.Tag", null)
@@ -4114,6 +4430,11 @@ namespace OutOfSchool.IdentityServer.Data.Migrations.OutOfSchoolMigrations
                     b.Navigation("ParticipantsOfTheEvent");
                 });
 
+            modelBuilder.Entity("OutOfSchool.Services.Models.Individual", b =>
+                {
+                    b.Navigation("Officials");
+                });
+
             modelBuilder.Entity("OutOfSchool.Services.Models.InstitutionStatus", b =>
                 {
                     b.Navigation("Providers");
@@ -4126,11 +4447,18 @@ namespace OutOfSchool.IdentityServer.Data.Migrations.OutOfSchoolMigrations
                     b.Navigation("Children");
                 });
 
+            modelBuilder.Entity("OutOfSchool.Services.Models.Position", b =>
+                {
+                    b.Navigation("Officials");
+                });
+
             modelBuilder.Entity("OutOfSchool.Services.Models.Provider", b =>
                 {
+                    b.Navigation("Employees");
+
                     b.Navigation("Images");
 
-                    b.Navigation("ProviderAdmins");
+                    b.Navigation("Positions");
 
                     b.Navigation("ProviderSectionItems");
 
@@ -4145,6 +4473,11 @@ namespace OutOfSchool.IdentityServer.Data.Migrations.OutOfSchoolMigrations
             modelBuilder.Entity("OutOfSchool.Services.Models.SubordinationStructure.Institution", b =>
                 {
                     b.Navigation("RelatedProviders");
+                });
+
+            modelBuilder.Entity("OutOfSchool.Services.Models.User", b =>
+                {
+                    b.Navigation("Individual");
                 });
 
             modelBuilder.Entity("OutOfSchool.Services.Models.Workshop", b =>

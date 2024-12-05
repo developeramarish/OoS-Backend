@@ -137,17 +137,17 @@ public class ChangeLogControllerTests
     public async Task ProviderAdmin_WhenSearchResultIsNotNullOrTotalAmountIsZero_ReturnsOkObjectResult()
     {
         // Arrange
-        var searchResult = new SearchResult<ProviderAdminChangesLogDto>()
+        var searchResult = new SearchResult<EmployeeChangesLogDto>()
         {
             TotalAmount = 1,
         };
 
-        var request = new ProviderAdminChangesLogRequest();
+        var request = new EmployeeChangesLogRequest();
 
-        changesLogServiceMock.Setup(x => x.GetProviderAdminChangesLogAsync(request)).ReturnsAsync(searchResult);
+        changesLogServiceMock.Setup(x => x.GetEmployeeChangesLogAsync(request)).ReturnsAsync(searchResult);
 
         // Act
-        var result = await controller.ProviderAdmin(request);
+        var result = await controller.Employee(request);
 
         // Assert
         result.Should().NotBeNull();
@@ -162,17 +162,17 @@ public class ChangeLogControllerTests
     public async Task ProviderAdmin_WhenSearchResultIsNotNullOrTotalAmountIsZero_ReturnsNoContentObjectResult()
     {
         // Arrange
-        var searchResult = new SearchResult<ProviderAdminChangesLogDto>()
+        var searchResult = new SearchResult<EmployeeChangesLogDto>()
         {
             TotalAmount = 0,
         };
 
-        var request = new ProviderAdminChangesLogRequest();
+        var request = new EmployeeChangesLogRequest();
 
-        changesLogServiceMock.Setup(x => x.GetProviderAdminChangesLogAsync(request)).ReturnsAsync(searchResult);
+        changesLogServiceMock.Setup(x => x.GetEmployeeChangesLogAsync(request)).ReturnsAsync(searchResult);
 
         // Act
-        var result = await controller.ProviderAdmin(request);
+        var result = await controller.Employee(request);
 
         // Assert
         result.Should().NotBeNull();

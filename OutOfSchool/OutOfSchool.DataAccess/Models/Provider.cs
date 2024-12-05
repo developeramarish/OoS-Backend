@@ -138,7 +138,7 @@ public class Provider : IKeyedEntity<Guid>, IImageDependentEntity<Provider>, ISo
 
     public virtual Institution Institution { get; set; }
 
-    public virtual ICollection<ProviderAdmin> ProviderAdmins { get; set; }
+    public virtual ICollection<Employee> Employees { get; set; }
 
     [Required]
     public InstitutionType InstitutionType { get; set; }
@@ -154,4 +154,6 @@ public class Provider : IKeyedEntity<Guid>, IImageDependentEntity<Provider>, ISo
 
     [DataType(DataType.DateTime)]
     public DateTime UpdatedAt { get; set; }
+
+    public virtual ICollection<Position> Positions { get; set; }
 }

@@ -31,4 +31,10 @@
     <ItemGroup>
         <Watch Include="wwwroot\**" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="..\OutOfSchool.GRPC\Protos\">
+        <Link>OutOfSchool\OutOfSchool.GRPC\Protos</Link>
+      </Folder>
+    </ItemGroup>
 </Project>

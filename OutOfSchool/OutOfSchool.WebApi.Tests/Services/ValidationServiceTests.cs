@@ -17,7 +17,7 @@ public class ValidationServiceTests
     private Mock<IProviderRepository> providerRepositoryMock;
     private Mock<IParentRepository> parentRepositoryMock;
     private Mock<IWorkshopRepository> workshopRepositoryMock;
-    private Mock<IProviderAdminRepository> providerAdminRepositoryMock;
+    private Mock<IEmployeeRepository> providerAdminRepositoryMock;
 
     private IValidationService validationService;
 
@@ -27,7 +27,7 @@ public class ValidationServiceTests
         providerRepositoryMock = new Mock<IProviderRepository>();
         parentRepositoryMock = new Mock<IParentRepository>();
         workshopRepositoryMock = new Mock<IWorkshopRepository>();
-        providerAdminRepositoryMock = new Mock<IProviderAdminRepository>();
+        providerAdminRepositoryMock = new Mock<IEmployeeRepository>();
 
         validationService = new ValidationService(
             providerRepositoryMock.Object,
@@ -95,11 +95,11 @@ public class ValidationServiceTests
 
     #region UserIsWorkshopOwner
     [Test]
-    public async Task UserIsWorkshopOwnerAsync_WhenTrue_ReturnsTrue()
+    [TestCase("someUserId")]
+    public async Task UserIsWorkshopOwnerAsync_WhenTrue_ReturnsTrue(string validUserId)
     {
         // Arrange
-        var validUserId = "someUserId";
-        var workshopWithProviderWithValidUserId = new Workshop()
+        var workshopWithProviderWithValidUserId = new Workshop
         {
             Id = Guid.NewGuid(),
             Provider = new Provider()
@@ -108,11 +108,22 @@ public class ValidationServiceTests
                 UserId = validUserId,
             },
         };
-        workshopRepositoryMock.Setup(x => x.GetByFilter(It.IsAny<Expression<Func<Workshop, bool>>>(), It.IsAny<string>()))
-            .ReturnsAsync(new List<Workshop>() { workshopWithProviderWithValidUserId });
+        workshopRepositoryMock
+            .Setup(x => x.GetByFilter(
+                It.IsAny<Expression<Func<Workshop, bool>>>(),
+                It.IsAny<string>()))
+            .ReturnsAsync(new List<Workshop> { workshopWithProviderWithValidUserId });
+
+        providerAdminRepositoryMock
+            .Setup(e => e.GetByFilter(
+                It.IsAny<Expression<Func<Employee, bool>>>(),
+                It.IsAny<string>()))
+            .ReturnsAsync(new List<Employee> { new Employee() });
 
         // Act
-        var result = await validationService.UserIsWorkshopOwnerAsync(validUserId, workshopWithProviderWithValidUserId.Id, Subrole.None).ConfigureAwait(false);
+        var result = await validationService
+            .UserIsWorkshopOwnerAsync(validUserId, workshopWithProviderWithValidUserId.Id)
+            .ConfigureAwait(false);
 
         // Assert
         Assert.IsTrue(result);
@@ -136,7 +147,9 @@ public class ValidationServiceTests
             .ReturnsAsync(new List<Workshop>() { workshopWithProviderWithAnotherUserId });
 
         // Act
-        var result = await validationService.UserIsWorkshopOwnerAsync(validUserId, workshopWithProviderWithAnotherUserId.Id, Subrole.None).ConfigureAwait(false);
+        var result = await validationService
+            .UserIsWorkshopOwnerAsync(validUserId, workshopWithProviderWithAnotherUserId.Id)
+            .ConfigureAwait(false);
 
         // Assert
         Assert.IsFalse(result);
@@ -151,7 +164,7 @@ public class ValidationServiceTests
             .ReturnsAsync(new List<Workshop>());
 
         // Act
-        var result = await validationService.UserIsWorkshopOwnerAsync(validUserId, Guid.NewGuid(), Subrole.None).ConfigureAwait(false);
+        var result = await validationService.UserIsWorkshopOwnerAsync(validUserId, Guid.NewGuid()).ConfigureAwait(false);
 
         // Assert
         Assert.IsFalse(result);

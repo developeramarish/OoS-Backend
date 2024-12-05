@@ -262,9 +262,9 @@ public class WorkshopServicesCombiner : IWorkshopServicesCombiner
     }
 
     /// <inheritdoc/>
-    public async Task<List<ShortEntityDto>> GetWorkshopListByProviderAdminId(string providerAdminId)
+    public async Task<List<ShortEntityDto>> GetWorkshopListByEmployeeId(string providerAdminId)
     {
-        return await workshopService.GetWorkshopListByProviderAdminId(providerAdminId).ConfigureAwait(false);
+        return await workshopService.GetWorkshopListByEmployeeId(providerAdminId).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
