@@ -1013,4 +1013,9 @@ public class ProviderService : IProviderService, ISensitiveProviderService
 
         return providersWithTheSameEdrpouIpn.Any();
     }
+
+    public async Task HasProviderRights(Guid providerId)
+    {
+        await currentUserService.UserHasRights(new ProviderRights(providerId));
+    }
 }
