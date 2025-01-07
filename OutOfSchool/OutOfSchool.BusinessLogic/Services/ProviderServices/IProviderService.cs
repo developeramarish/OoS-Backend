@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using OutOfSchool.BusinessLogic.Models.Individual;
 using OutOfSchool.BusinessLogic.Models.Providers;
 using OutOfSchool.Common.Enums;
 using OutOfSchool.Common.Models;
@@ -96,6 +97,13 @@ public interface IProviderService
     Task<bool> Exists(Guid id);
 
     /// <summary>
+    /// Upload employees for provider.
+    /// </summary>
+    /// <param name="id">Id of provider that requests upload.</param>
+    /// <param name="uploadEployees">List of employees to upload.</param>
+    /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+    Task<UploadEmployeeResponse> UploadEmployeesForProvider(Guid id, UploadEmployeeRequestDto[] data);
+
     /// Checks whether the current user has Provider rights for the specified provider.
     /// </summary>
     /// <param name="providerId">The unique identifier of the provider.</param>    
