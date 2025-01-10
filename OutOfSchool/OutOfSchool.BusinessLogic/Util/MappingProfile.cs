@@ -17,6 +17,7 @@ using OutOfSchool.BusinessLogic.Models.Providers;
 using OutOfSchool.BusinessLogic.Models.Exported;
 using OutOfSchool.BusinessLogic.Models.SocialGroup;
 using OutOfSchool.BusinessLogic.Models.StatisticReports;
+using OutOfSchool.BusinessLogic.Models.StudySubjects;
 using OutOfSchool.BusinessLogic.Models.SubordinationStructure;
 using OutOfSchool.BusinessLogic.Models.Tag;
 using OutOfSchool.BusinessLogic.Models.Workshops;
@@ -898,6 +899,31 @@ public class MappingProfile : Profile
                 .ForMember(dest => dest.IsDeleted, opt => opt.Ignore());        
         
         CreateMap<Position, PositionDto>();
+
+        CreateMap<StudySubjectCreateUpdateDto, StudySubject>()
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.ModifiedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.DeletedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.DeleteDate, opt => opt.Ignore())
+            .ForMember(dest => dest.IsSystemProtected, opt => opt.Ignore())
+            .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
+            .ForMember(dest => dest.Document, opt => opt.Ignore())
+            .ForMember(dest => dest.File, opt => opt.Ignore())
+            .ForMember(dest => dest.ActiveFrom, opt => opt.Ignore())
+            .ForMember(dest => dest.ActiveTo, opt => opt.Ignore())
+            .ForMember(dest => dest.IsBlocked, opt => opt.Ignore())
+            .ForMember(dest => dest.PrimaryLanguage, opt => opt.Ignore())
+            .ForMember(dest => dest.Languages,
+                opt => opt.Ignore())
+            .ForMember(dest => dest.PrimaryLanguageId,
+                opt => opt.MapFrom(src => src.LanguagesSelection.FirstOrDefault(l => l.IsPrimary).Id));
+
+        CreateMap<StudySubject, StudySubjectDto>()
+            .ForMember(dest => dest.WorkshopId, opt => opt.Ignore());
+
+        CreateMap<Language, LanguageDto>().ReverseMap();
     }
 
     public IMappingExpression<TSource, TDestination> CreateSoftDeletedMap<TSource, TDestination>()
