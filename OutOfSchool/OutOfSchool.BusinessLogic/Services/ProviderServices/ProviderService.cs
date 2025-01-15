@@ -538,6 +538,16 @@ public class ProviderService : IProviderService, ISensitiveProviderService
 
     public async Task<UploadEmployeeResponse> UploadEmployeesForProvider(Guid id, UploadEmployeeRequestDto[] data)
     {
+        var isProviderExists = await Exists(id).ConfigureAwait(false);
+
+        if (!isProviderExists)
+        {
+            logger.LogError("User has no rights to perform operation. Provider with Id = {id} doesn't exist.", id);
+            throw new UnauthorizedAccessException("User has no rights to perform operation.");
+        }
+
+        await currentUserService.UserHasRights(new ProviderRights(id));
+
         // Check list of Employees for uploading.
         CheckListOfEmployeesForUploading(data);
 
@@ -1075,7 +1085,7 @@ public class ProviderService : IProviderService, ISensitiveProviderService
         // Check if the Rnokpp property values ​​are unique?
         if (uploadEmployeesRnokpps.Distinct().Count() != data.Length)
         {
-            var errorMessage = $"The Rnokpp property values are not unique.";
+            var errorMessage = "The Rnokpp property values are not unique.";
             logger.LogError(errorMessage);
             throw new InvalidOperationException(errorMessage);
         }
