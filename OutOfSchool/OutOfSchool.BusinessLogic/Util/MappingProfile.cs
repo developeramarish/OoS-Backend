@@ -313,7 +313,8 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Images, opt => opt.Ignore())
             .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.Employees, opt => opt.Ignore())
-            .ForMember(dest => dest.Positions, opt => opt.Ignore());
+            .ForMember(dest => dest.Positions, opt => opt.Ignore())
+            .ForMember(dest => dest.WorkshopDrafts, opt => opt.Ignore());
 
         CreateSoftDeletedMap<ProviderUpdateDto, Provider>()
             .Apply(IgnoreCommonProviderBaseDto2Provider)
@@ -327,7 +328,8 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.IsBlocked, opt => opt.Ignore())
             .ForMember(dest => dest.BlockReason, opt => opt.Ignore())
             .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
-            .ForMember(dest => dest.Positions, opt => opt.Ignore());
+            .ForMember(dest => dest.Positions, opt => opt.Ignore())
+            .ForMember(dest => dest.WorkshopDrafts, opt => opt.Ignore()); 
 
         CreateMap<Provider, ProviderUpdateDto>()
             .Apply(AddCommonProvider2ProviderBaseDto);
@@ -357,7 +359,8 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.IsBlocked, opt => opt.Ignore())
             .ForMember(dest => dest.BlockReason, opt => opt.Ignore())
             .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
-            .ForMember(dest => dest.Positions, opt => opt.Ignore());
+            .ForMember(dest => dest.Positions, opt => opt.Ignore())
+            .ForMember(dest => dest.WorkshopDrafts, opt => opt.Ignore());
 
         CreateMap<Provider, ProviderCreateDto>()
             .Apply(AddCommonProvider2ProviderBaseDto);
