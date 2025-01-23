@@ -185,6 +185,7 @@ public partial class OutOfSchoolDbContext : IdentityDbContext<User>, IDataProtec
         builder.ApplyConfiguration(new InstitutionFieldDescriptionConfiguration());
         builder.ApplyConfiguration(new InstitutionHierarchyConfiguration());
         builder.ApplyConfiguration(new InstitutionStatusConfiguration());
+        builder.ApplyConfiguration(new LanguageConfiguration());
         builder.ApplyConfiguration(new NotificationConfiguration());
         builder.ApplyConfiguration(new OfficialConfiguration());
         builder.ApplyConfiguration(new OperationWithObjectConfiguration());
@@ -196,13 +197,12 @@ public partial class OutOfSchoolDbContext : IdentityDbContext<User>, IDataProtec
         builder.ApplyConfiguration(new RatingConfiguration());
         builder.ApplyConfiguration(new RegionAdminConfiguration());
         builder.ApplyConfiguration(new SocialGroupConfiguration());
+        builder.ApplyConfiguration(new StudySubjectConfiguration());
         builder.ApplyConfiguration(new TagConfiguration());
         builder.ApplyConfiguration(new TeacherConfiguration());
         builder.ApplyConfiguration(new UserConfiguration());
         builder.ApplyConfiguration(new WorkshopConfiguration());
         builder.ApplyConfiguration(new WorkshopDescriptionItemConfiguration());
-        builder.ApplyConfiguration(new StudySubjectConfiguration());
-        builder.ApplyConfiguration(new LanguageConfiguration());
         builder.ApplyConfiguration(new EntityImagesConfiguration<WorkshopDraft>());
         builder.ApplyConfiguration(new WorkshopDraftConfiguration());
         builder.ApplyConfiguration(new TeacherDraftConfiguration());
