@@ -221,8 +221,32 @@ public class StudySubjectControllerTests
         Assert.That(result.StatusCode, Is.EqualTo(400));
     }
 
+    [Test]
+    public void Create_ReturnsValidationError_WhenLanguageIdIsLessThanOrEqualToZero()
+    {
+        // Arrange
+        var dto = new StudySubjectCreateUpdateDto()
+        {
+            Id = Guid.NewGuid(),
+            NameInUkrainian = "тест",
+            NameInInstructionLanguage = "тест",
+            IsLanguageUkrainian = true,
+            Language = new LanguageDto { Id = 0, Code = "Ua", Name = "Українська" }
+        };
+
+        // Act
+        var validationResults = new List<ValidationResult>();
+        var validationContext = new ValidationContext(dto);
+        bool isValid = Validator.TryValidateObject(dto, validationContext, validationResults, true);
+
+        // Assert
+        Assert.IsFalse(isValid);
+        Assert.AreEqual(1, validationResults.Count);
+        Assert.AreEqual("Language ID must be greater than 0.", validationResults[0].ErrorMessage);
+    }
+
     #endregion
-    
+
     #region Update
 
     [Test]
@@ -519,26 +543,16 @@ public class StudySubjectControllerTests
             ActiveFrom = DateOnly.FromDateTime(DateTime.Now),
             ActiveTo = DateOnly.FromDateTime(DateTime.Now),
             Id = Guid.NewGuid(),
-            IsPrimaryLanguageUkrainian = true,
-            Languages = new List<LanguageDto>
+            IsLanguageUkrainian = true,
+            Language = new LanguageDto()
             {
-                new LanguageDto()
-                {
-                    Id = 1,
-                    Name = "Українська",
-                    Code = "uk"
-
-                },
-                new LanguageDto()
-                {
-                    Id = 2,
-                    Name = "English",
-                    Code = "en"
-                }
+                Id = 2,
+                Name = "English",
+                Code = "en"
             },
             NameInInstructionLanguage = "тест",
             NameInUkrainian = "тест",
-            PrimaryLanguageId = 1,
+            LanguageId = 1,
             WorkshopId = Guid.NewGuid()
         };
     }
@@ -548,19 +562,12 @@ public class StudySubjectControllerTests
         return new StudySubjectCreateUpdateDto()
         {
             Id = Guid.NewGuid(),
-            IsPrimaryLanguageUkrainian = true,
-            LanguagesSelection = new List<LanguagesSelection>
+            IsLanguageUkrainian = true,
+            Language = new LanguageDto()
             {
-                new LanguagesSelection()
-                {
-                    Id = 1,
-                    IsPrimary = false
-                },
-                new LanguagesSelection()
-                {
-                    Id = 2,
-                    IsPrimary = true
-                }
+                Id = 2,
+                Name = "English",
+                Code = "en"
             },
             NameInInstructionLanguage = "тест",
             NameInUkrainian = "тест"
@@ -572,19 +579,12 @@ public class StudySubjectControllerTests
         return new StudySubjectCreateUpdateDto()
         {
             Id = Guid.NewGuid(),
-            IsPrimaryLanguageUkrainian = true,
-            LanguagesSelection = new List<LanguagesSelection>
+            IsLanguageUkrainian = true,
+            Language = new LanguageDto()
             {
-                new LanguagesSelection()
-                {
-                    Id = 1,
-                    IsPrimary = false
-                },
-                new LanguagesSelection()
-                {
-                    Id = 2,
-                    IsPrimary = true
-                }
+                Id = 2,
+                Name = "English",
+                Code = "en"
             },
             NameInInstructionLanguage = null,
             NameInUkrainian = null
