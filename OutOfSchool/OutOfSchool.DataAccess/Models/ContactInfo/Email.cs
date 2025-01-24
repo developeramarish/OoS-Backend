@@ -1,11 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using OutOfSchool.Common;
 
-namespace OutOfSchool.Services.Models;
+namespace OutOfSchool.Services.Models.ContactInfo;
 
 public class Email
 {
+    public string Type { get; set; }
+
     [DataType(DataType.EmailAddress)]
-    [MaxLength(Constants.MaxEmailAddressLength)]
-    public string EmailAddress { get; set; }
+    public string Address { get; set; }
 }

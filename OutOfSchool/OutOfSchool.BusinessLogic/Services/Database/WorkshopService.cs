@@ -48,6 +48,7 @@ public class WorkshopService : IWorkshopService, ISensitiveWorkshopsService
     private readonly ICodeficatorService codeficatorService;
     private readonly ISearchStringService searchStringService;
     private readonly ITagService tagService;
+    private readonly IContactsService<Workshop, IHasContactsDto<Workshop>> contactsService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="WorkshopService"/> class.
@@ -87,7 +88,8 @@ public class WorkshopService : IWorkshopService, ISensitiveWorkshopsService
         IRegionAdminService regionAdminService,
         ICodeficatorService codeficatorService,
         ITagService tagService,
-        ISearchStringService searchStringService)
+        ISearchStringService searchStringService,
+        IContactsService<Workshop, IHasContactsDto<Workshop>> contactsService)
     {
         this.workshopRepository = workshopRepository;
         this.tagRepository = tagRepository;
@@ -106,6 +108,7 @@ public class WorkshopService : IWorkshopService, ISensitiveWorkshopsService
         this.codeficatorService = codeficatorService;
         this.searchStringService = searchStringService;
         this.tagService = tagService;
+        this.contactsService = contactsService;
     }
 
     /// <inheritdoc/>
@@ -352,7 +355,9 @@ public class WorkshopService : IWorkshopService, ISensitiveWorkshopsService
             dto.AddressId = currentWorkshop.AddressId;
             dto.Address.Id = currentWorkshop.AddressId;
 
-            await ChangeTeachers(currentWorkshop, dto.Teachers ?? new List<TeacherDTO>()).ConfigureAwait(false);
+            await ChangeTeachers(currentWorkshop, dto.Teachers ?? []).ConfigureAwait(false);
+            
+            contactsService.PrepareUpdatedContacts(currentWorkshop, dto);
 
             if (!dto.TagIds.IsNullOrEmpty())
             {
@@ -366,7 +371,7 @@ public class WorkshopService : IWorkshopService, ISensitiveWorkshopsService
                         tags.Add(tagDto);
                     }
                 }
-
+            
                 currentWorkshop.Tags.Clear();
                 currentWorkshop.Tags.AddRange(tags.Select(tagDto => new Tag { Id = tagDto.Id }));
             }
@@ -476,7 +481,9 @@ public class WorkshopService : IWorkshopService, ISensitiveWorkshopsService
             dto.AddressId = currentWorkshop.AddressId;
             dto.Address.Id = currentWorkshop.AddressId;
 
-            await ChangeTeachers(currentWorkshop, dto.Teachers ?? new List<TeacherDTO>()).ConfigureAwait(false);
+            await ChangeTeachers(currentWorkshop, dto.Teachers ?? []).ConfigureAwait(false);
+            
+            contactsService.PrepareUpdatedContacts(currentWorkshop, dto);
 
             dto.AvailableSeats = dto.AvailableSeats.GetMaxValueIfNullOrZero();
 
@@ -1164,6 +1171,8 @@ public class WorkshopService : IWorkshopService, ISensitiveWorkshopsService
 
         createdWorkshop.Tags = (await tagRepository.GetByFilter(tag => dto.TagIds.Contains(tag.Id))).ToList();
         createdWorkshop.Status = WorkshopStatus.Open;
+        
+        contactsService.PrepareNewContacts(createdWorkshop, dto);
 
         return createdWorkshop;
     }

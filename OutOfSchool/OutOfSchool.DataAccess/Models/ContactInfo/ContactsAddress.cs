@@ -1,28 +1,20 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace OutOfSchool.Services.Models;
+namespace OutOfSchool.Services.Models.ContactInfo;
 
-// TODO: This entity will stay until we fully move everything to unified contacts
-public class Address : IKeyedEntity<long>, ISoftDeleted
+public class ContactsAddress
 {
-    public long Id { get; set; }
-
-    public bool IsDeleted { get; set; }
-
-    [Required(ErrorMessage = "Street is required")]
-    [MaxLength(60)]
     public string Street { get; set; }
 
-    [Required(ErrorMessage = "Building number is required")]
-    [MaxLength(15)]
     public string BuildingNumber { get; set; }
 
+    [Range(-90, 90, ErrorMessage = "Latitude must be between -90 and 90 degrees")]
     public double Latitude { get; set; }
 
+    [Range(-180, 180, ErrorMessage = "Longitude must be between -180 and 180 degrees")]
     public double Longitude { get; set; }
 
-    // parameter r means size (resolution) of hexagon
     public ulong GeoHash { get; set; } = default;
 
     [Required(ErrorMessage = "CATOTTGId is required")]
@@ -32,14 +24,7 @@ public class Address : IKeyedEntity<long>, ISoftDeleted
 
     public override bool Equals(object obj)
     {
-        if (obj == null)
-        {
-            return false;
-        }
-
-        var address = obj as Address;
-
-        if (address == null)
+        if (obj is not ContactsAddress address)
         {
             return false;
         }
@@ -53,7 +38,7 @@ public class Address : IKeyedEntity<long>, ISoftDeleted
     {
         unchecked
         {
-            int hash = 13;
+            var hash = 13;
             hash = (hash * 7) + CATOTTGId.GetHashCode();
             hash = (hash * 7) + (!ReferenceEquals(null, Street) ? Street.GetHashCode(StringComparison.OrdinalIgnoreCase) : 0);
             hash = (hash * 7) + (!ReferenceEquals(null, BuildingNumber) ? BuildingNumber.GetHashCode(StringComparison.OrdinalIgnoreCase) : 0);
