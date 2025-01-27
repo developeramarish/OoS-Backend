@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Bogus;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
 using OutOfSchool.BusinessLogic.Models.Workshops.Drafts;
@@ -23,6 +24,7 @@ public class DraftStorageServiceTests
     private Mock<IReadWriteCacheService> readWriteCacheServiceMock;
     private Mock<ILogger<DraftStorageService<WorkshopMainRequiredPropertiesDto>>> loggerMock;
     private IDraftStorageService<WorkshopMainRequiredPropertiesDto> draftStorageService;
+    private Mock<IOptions<RedisForDraftConfig>> redisConfigMock;
 
     [SetUp]
     public void SetUp()
@@ -31,7 +33,12 @@ public class DraftStorageServiceTests
         cacheKey = GetCacheKey(key, typeof(WorkshopMainRequiredPropertiesDto));
         loggerMock = new Mock<ILogger<DraftStorageService<WorkshopMainRequiredPropertiesDto>>>();
         readWriteCacheServiceMock = new Mock<IReadWriteCacheService>();
-        draftStorageService = new DraftStorageService<WorkshopMainRequiredPropertiesDto>(readWriteCacheServiceMock.Object, loggerMock.Object);
+        redisConfigMock = new Mock<IOptions<RedisForDraftConfig>>();
+        redisConfigMock.Setup(c => c.Value).Returns(new RedisForDraftConfig
+        {
+            AbsoluteExpirationRelativeToNowInterval = TimeSpan.FromMinutes(1)
+        });
+        draftStorageService = new DraftStorageService<WorkshopMainRequiredPropertiesDto>(readWriteCacheServiceMock.Object, loggerMock.Object, redisConfigMock.Object);
     }
 
     [Test]
@@ -78,8 +85,8 @@ public class DraftStorageServiceTests
         readWriteCacheServiceMock.Setup(c => c.WriteAsync(
             cacheKey,
             workshopJsonString,
-            null,
-            null))
+            redisConfigMock.Object.Value.AbsoluteExpirationRelativeToNowInterval,
+            TimeSpan.Zero))
             .Verifiable(Times.Once);
 
         // Act
@@ -120,6 +127,41 @@ public class DraftStorageServiceTests
         await draftStorageService.RemoveAsync(key).ConfigureAwait(false);
 
         // Assert
+        readWriteCacheServiceMock.VerifyAll();
+    }
+
+    [Test]
+    public async Task GetTimeToLiveAsync_WhenDraftExistsInCache_ShouldRestoreAppropriatedEntity()
+    {
+        // Arrange
+        TimeSpan? timeToLive = TimeSpan.FromMinutes(1);
+        readWriteCacheServiceMock.Setup(c => c.GetTimeToLiveAsync(cacheKey))
+            .Returns(() => Task.FromResult(timeToLive))
+            .Verifiable(Times.Once);
+
+        // Act
+        var result = await draftStorageService.GetTimeToLiveAsync(key).ConfigureAwait(false);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().Be(timeToLive);
+        readWriteCacheServiceMock.VerifyAll();
+    }
+
+    [Test]
+    public async Task GetTimeToLiveAsync_WhenDraftIsAbsentInCache_ShouldRestoreDefaultEntity()
+    {
+        // Arrange
+        TimeSpan? timeToLive = null;
+        readWriteCacheServiceMock.Setup(c => c.GetTimeToLiveAsync(cacheKey))
+            .Returns(() => Task.FromResult(timeToLive))
+            .Verifiable(Times.Once);
+
+        // Act
+        var result = await draftStorageService.GetTimeToLiveAsync(key).ConfigureAwait(false);
+
+        // Assert
+        result.Should().BeNull();
         readWriteCacheServiceMock.VerifyAll();
     }
 
