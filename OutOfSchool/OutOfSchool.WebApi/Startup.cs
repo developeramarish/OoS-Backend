@@ -394,6 +394,7 @@ public static class Startup
         services.AddTransient<IOfficialService, OfficialService>();
 
         services.AddTransient<IWorkshopDraftService, WorkshopDraftService>();
+        services.AddTransient<ISensitiveWorkshopDraftService, WorkshopDraftService>();
 
         services.AddTransient<IGRPCCommonService, GRPCCommonService>();
         services.AddTransient<IWorkshopStrategy>(sp =>
