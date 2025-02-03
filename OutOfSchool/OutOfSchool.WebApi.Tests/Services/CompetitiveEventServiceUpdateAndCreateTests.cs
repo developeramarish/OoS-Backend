@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using OutOfSchool.BusinessLogic;
+using OutOfSchool.BusinessLogic.Models;
 using OutOfSchool.BusinessLogic.Models.CompetitiveEvent;
 using OutOfSchool.BusinessLogic.Services;
 using OutOfSchool.Services.Models.CompetitiveEvents;
@@ -26,7 +27,8 @@ class CompetitiveEventServiceUpdateAndCreateTests
     private Mock<IStringLocalizer<SharedResource>> mockLocalizer;
     private Mock<IMapper> mockMapper;
     private Mock<ICurrentUserService> userService;
-
+    private Mock<IContactsService<CompetitiveEvent, IHasContactsDto<CompetitiveEvent>>> contactsService;
+    
     private CompetitiveEventService service;
 
     [SetUp]
@@ -39,6 +41,7 @@ class CompetitiveEventServiceUpdateAndCreateTests
         mockLocalizer = new Mock<IStringLocalizer<SharedResource>>();
         mockMapper = new Mock<IMapper>();
         userService = new Mock<ICurrentUserService>();
+        contactsService = new Mock<IContactsService<CompetitiveEvent, IHasContactsDto<CompetitiveEvent>>>();
 
         service = new CompetitiveEventService(
             mockCompetitiveEventRepository.Object,
@@ -47,7 +50,8 @@ class CompetitiveEventServiceUpdateAndCreateTests
             mockLogger.Object,
             mockLocalizer.Object,
             mockMapper.Object,
-            userService.Object);
+            userService.Object,
+            contactsService.Object);
     }
 
     [Test]
@@ -92,10 +96,13 @@ class CompetitiveEventServiceUpdateAndCreateTests
                 Judges = input.Judges,
             });
 
-        
+        contactsService
+            .Setup(c => c.PrepareNewContacts(It.IsAny<CompetitiveEvent>(), It.IsAny<CompetitiveEventCreateDto>()))
+            .Verifiable();
+
         mockCompetitiveEventRepository
             .Setup(r => r.RunInTransaction(It.IsAny<Func<Task<CompetitiveEvent>>>()))
-            .ReturnsAsync(createdEvent);// ???
+            .ReturnsAsync(createdEvent);
 
         // Act
         var result = await service.Create(input).ConfigureAwait(false);
@@ -112,6 +119,7 @@ class CompetitiveEventServiceUpdateAndCreateTests
         mockMapper.Verify(m => m.Map<CompetitiveEvent>(It.IsAny<CompetitiveEventCreateDto>()), Times.Once);
         mockMapper.Verify(m => m.Map<CompetitiveEventDto>(It.IsAny<CompetitiveEvent>()), Times.Once);
         mockCompetitiveEventRepository.Verify(r => r.RunInTransaction(It.IsAny<Func<Task<CompetitiveEvent>>>()), Times.Once);
+        contactsService.Verify(c => c.PrepareNewContacts(It.IsAny<CompetitiveEvent>(), It.IsAny<CompetitiveEventCreateDto>()), Times.Once);
     }
 
     [Test]
@@ -143,6 +151,10 @@ class CompetitiveEventServiceUpdateAndCreateTests
             .Setup(r => r.Update(It.IsAny<CompetitiveEvent>()))
             .ReturnsAsync((CompetitiveEvent input) => input);
 
+        contactsService
+            .Setup(c => c.PrepareUpdatedContacts(It.IsAny<CompetitiveEvent>(), It.IsAny<CompetitiveEventUpdateDto>()))
+            .Verifiable();
+
         mockCompetitiveEventRepository
             .Setup(r => r.RunInTransaction(It.IsAny<Func<Task<CompetitiveEvent>>>()))
             .Returns<Func<Task<CompetitiveEvent>>>(async operation => await operation());
@@ -158,6 +170,7 @@ class CompetitiveEventServiceUpdateAndCreateTests
         Assert.AreEqual("New Title", result.Title, "Title was not updated correctly.");
         mockCompetitiveEventRepository.Verify(r => r.GetByIdWithDetails(existingEventId, "Judges,CompetitiveEventDescriptionItems"), Times.Once);
         mockCompetitiveEventRepository.Verify(r => r.Update(It.IsAny<CompetitiveEvent>()), Times.Once);
+        contactsService.Verify(c => c.PrepareUpdatedContacts(It.IsAny<CompetitiveEvent>(), It.IsAny<CompetitiveEventUpdateDto>()), Times.Once);
     }
 
     [Test]
